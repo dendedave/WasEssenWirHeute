@@ -1,83 +1,36 @@
 <!doctype html>
 <html lang="de">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#111827">
-  <title>Sucuk oder Hasushi?</title>
-  <style>
-    :root { color-scheme: dark; --bg:#0f172a; --card:#1e293b; --text:#f8fafc; --muted:#cbd5e1; --accent:#f59e0b; }
-    * { box-sizing:border-box; }
-    body { margin:0; min-height:100vh; display:grid; place-items:center; padding:24px; font-family:system-ui,-apple-system,Segoe UI,sans-serif; color:var(--text); background:radial-gradient(circle at top,#334155 0,#0f172a 55%); }
-    main { width:min(100%,560px); padding:36px 28px 28px; text-align:center; background:rgba(30,41,59,.94); border:1px solid rgba(255,255,255,.12); border-radius:28px; box-shadow:0 24px 70px rgba(0,0,0,.35); }
-    .emoji { font-size:4rem; line-height:1; }
-    h1 { margin:18px 0 8px; font-size:clamp(2rem,8vw,3.5rem); letter-spacing:-.04em; }
-    p { margin:0 0 28px; color:var(--muted); }
-    .choices { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:22px 0; }
-    .choice { padding:22px 10px; border-radius:18px; background:#334155; font-size:1.25rem; font-weight:700; transition:.2s; }
-    .choice.active { background:var(--accent); color:#111827; transform:scale(1.03); }
-    button { width:100%; border:0; border-radius:14px; padding:15px 18px; font:inherit; font-weight:800; cursor:pointer; color:#111827; background:var(--accent); transition:transform .15s, filter .15s; }
-    button:hover { filter:brightness(1.08); transform:translateY(-1px); }
-    button:active { transform:translateY(1px); }
-    #result { min-height:55px; margin:22px 0 18px; font-size:clamp(1.8rem,7vw,2.8rem); font-weight:900; }
-    .secondary { color:var(--text); background:#475569; font-size:.95rem; }
-    .hint { margin:18px 0 0; font-size:.8rem; color:#94a3b8; }
-    @media (max-width:400px) { main { padding:28px 18px 22px; } }
-  </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wo essen wir?</title>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--card2:#334155;--text:#f8fafc;--muted:#cbd5e1;--accent:#f59e0b;--danger:#ef4444}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:20px;font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:var(--text);background:radial-gradient(circle at top,#334155,#0f172a 60%)}main{width:min(100%,620px);padding:32px 26px 26px;background:rgba(30,41,59,.96);border:1px solid #475569;border-radius:26px;box-shadow:0 20px 60px #0006}h1{margin:0 0 8px;font-size:clamp(2rem,7vw,3.3rem);letter-spacing:-.04em}p{color:var(--muted);margin:0 0 25px}.add{display:flex;gap:8px;margin-bottom:14px}.add input{min-width:0;flex:1}.input{padding:13px 14px;border:1px solid #64748b;border-radius:12px;background:#0f172a;color:var(--text);font:inherit}.small{width:auto;padding:11px 15px;white-space:nowrap}button{border:0;border-radius:12px;padding:13px 16px;background:var(--accent);color:#111827;font:inherit;font-weight:800;cursor:pointer}button:hover{filter:brightness(1.08)}.list{display:flex;flex-wrap:wrap;gap:8px;min-height:42px;margin-bottom:20px}.tag{display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:999px;background:var(--card2);color:var(--text)}.remove{padding:0;background:transparent;color:#fecaca;font-size:1.1rem;line-height:1}.primary{width:100%;font-size:1.08rem}.result{min-height:74px;margin:22px 0;text-align:center;font-size:clamp(1.8rem,7vw,2.8rem);font-weight:900}.secondary{width:100%;background:#475569;color:var(--text);font-size:.95rem}.status{text-align:center;margin:14px 0 0;font-size:.85rem;color:#94a3b8}.empty{text-align:center;color:#94a3b8;width:100%}@media(max-width:430px){main{padding:25px 17px}.add{flex-wrap:wrap}.add input{flex-basis:100%}.small{flex:1}}
+</style>
 </head>
-<body>
-  <main>
-    <div class="emoji">🤔</div>
-    <h1>Sucuk oder Hasushi?</h1>
-    <p>Keine Lust zu entscheiden? Lass den Zufall ran.</p>
-    <div class="choices" aria-label="Auswahlmöglichkeiten">
-      <div class="choice" id="sucuk">🌯 Sucuk</div>
-      <div class="choice" id="hasushi">🍣 Hasushi</div>
-    </div>
-    <button id="decide">Entscheidung treffen</button>
-    <div id="result" aria-live="polite">❔</div>
-    <button class="secondary" id="share">🔗 Link kopieren</button>
-    <div class="hint" id="status">Teile diese Seite mit deinen Freunden.</div>
-  </main>
-  <script>
-    const options = [
-      { name: 'Sucuk', id: 'sucuk' },
-      { name: 'Hasushi', id: 'hasushi' }
-    ];
-    const result = document.querySelector('#result');
-    const status = document.querySelector('#status');
-    const decide = document.querySelector('#decide');
-    const share = document.querySelector('#share');
-
-    function randomIndex() {
-      const values = new Uint32Array(1);
-      crypto.getRandomValues(values);
-      return values[0] % options.length;
-    }
-
-    function choose() {
-      decide.disabled = true;
-      result.textContent = '…';
-      document.querySelectorAll('.choice').forEach(el => el.classList.remove('active'));
-      setTimeout(() => {
-        const selected = options[randomIndex()];
-        result.textContent = selected.name + '!';
-        document.querySelector('#' + selected.id).classList.add('active');
-        decide.disabled = false;
-      }, 450);
-    }
-
-    async function copyLink() {
-      try {
-        await navigator.clipboard.writeText(location.href);
-        status.textContent = 'Link kopiert – jetzt kannst du ihn teilen!';
-      } catch {
-        status.textContent = 'Kopiere den Link aus der Adresszeile deines Browsers.';
-      }
-    }
-
-    decide.addEventListener('click', choose);
-    share.addEventListener('click', copyLink);
-  </script>
-</body>
-</html>
+<body><main>
+<h1>Wo essen wir?</h1><p>Trage oben Restaurants, Gerichte oder Essensarten ein – der Zufall entscheidet.</p>
+<div class="add"><input id="newOption" class="input" placeholder="z. B. Sucuk, Hasushi, Pizza …" maxlength="60"><button id="add" class="small">Hinzufügen</button></div>
+<div id="list" class="list"></div>
+<button id="choose" class="primary">🎲 Zufällig entscheiden</button>
+<div id="result" class="result" aria-live="polite">❔</div>
+<button id="share" class="secondary">🔗 Link mit diesen Optionen kopieren</button>
+<div id="status" class="status">Die Optionen werden automatisch im Link gespeichert.</div>
+</main>
+<script>
+const defaults=['Sucuk','Hasushi']; let options=[];
+const $=id=>document.getElementById(id);
+function load(){
+  const raw=location.hash.startsWith('#options=')?decodeURIComponent(location.hash.slice(9)):'';
+  options=raw?raw.split('|').map(x=>x.trim()).filter(Boolean):defaults.slice(); render();
+}
+function render(){
+  $('list').innerHTML=options.length?options.map((x,i)=>`<span class="tag">${escapeHtml(x)} <button class="remove" title="Entfernen" data-index="${i}">×</button></span>`).join(''):'<span class="empty">Noch keine Optionen vorhanden.</span>';
+  document.querySelectorAll('.remove').forEach(b=>b.onclick=()=>{options.splice(Number(b.dataset.index),1);render();});
+}
+function escapeHtml(s){return s.replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+function add(){const input=$('newOption'), value=input.value.trim(); if(!value)return; if(!options.some(x=>x.toLowerCase()===value.toLowerCase()))options.push(value); input.value='';render();input.focus();}
+function choose(){if(!options.length){$('result').textContent='Bitte zuerst eine Option hinzufügen.';return} $('result').textContent='…'; setTimeout(()=>{$('result').textContent='🍽️ '+options[Math.floor(Math.random()*options.length)]+'!';},400);}
+async function share(){if(!options.length){$('status').textContent='Füge zuerst mindestens eine Option hinzu.';return} const url=location.origin+location.pathname+'#options='+encodeURIComponent(options.join('|')); try{await navigator.clipboard.writeText(url);$('status').textContent='Link kopiert – die Optionen sind darin enthalten!';}catch{$('status').textContent='Link konnte nicht automatisch kopiert werden: '+url;}}
+$('add').onclick=add;$('newOption').onkeydown=e=>{if(e.key==='Enter')add()};$('choose').onclick=choose;$('share').onclick=share;load();
+</script></body></html>
